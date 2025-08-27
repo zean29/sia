@@ -318,21 +318,15 @@ class AutentikasiController extends Controller
 
         switch ($pengguna->peran) {
             case 'mahasiswa':
-                if ($pengguna->mahasiswa) {
-                    $dataRelasi['data_mahasiswa'] = $pengguna->mahasiswa->load('programStudi.fakultas');
-                }
+                $dataRelasi['tipe_akses'] = 'mahasiswa';
                 break;
 
             case 'dosen':
-                if ($pengguna->dosen) {
-                    $dataRelasi['data_dosen'] = $pengguna->dosen->load('fakultas');
-                }
+                $dataRelasi['tipe_akses'] = 'dosen';
                 break;
 
             case 'staf':
-                if ($pengguna->staf) {
-                    $dataRelasi['data_staf'] = $pengguna->staf->load('fakultas');
-                }
+                $dataRelasi['tipe_akses'] = 'staf';
                 break;
 
             case 'admin':

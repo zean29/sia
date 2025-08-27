@@ -23,6 +23,7 @@ return new class extends Migration
             $table->timestamp('terakhir_masuk')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
             
             // Index untuk performa
             $table->index(['peran', 'aktif']);

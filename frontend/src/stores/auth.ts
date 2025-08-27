@@ -40,11 +40,15 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = true
       error.value = null
 
+      console.log('Auth store: sending login request with', credentials)
       const response = await api.post('/autentikasi/masuk', credentials)
+      console.log('Auth store: received response', response.data)
       
       if (response.data.sukses) {
         const { pengguna, token: authToken } = response.data.data
         
+        console.log('Auth store: login successful, storing data')
+        console.log('Auth store: user data:', pengguna)
         // Store authentication data
         user.value = pengguna
         token.value = authToken
@@ -53,14 +57,17 @@ export const useAuthStore = defineStore('auth', () => {
         // Set default axios header
         api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
         
+        console.log('Auth store: about to redirect after login')
         // Redirect based on role
         await redirectAfterLogin()
         
+        console.log('Auth store: login process completed')
         return { success: true, user: pengguna }
       } else {
         throw new Error(response.data.pesan || 'Login gagal')
       }
     } catch (err: any) {
+      console.error('Auth store: login error', err)
       const message = err.response?.data?.pesan || err.message || 'Terjadi kesalahan saat login'
       error.value = message
       return { success: false, error: message }
@@ -84,7 +91,7 @@ export const useAuthStore = defineStore('auth', () => {
       delete api.defaults.headers.common['Authorization']
       
       // Redirect to login
-      router.push('/login')
+      router.replace('/auth/login')
     }
   }
 
@@ -165,24 +172,35 @@ export const useAuthStore = defineStore('auth', () => {
     const role = user.value?.peran
     const intendedRoute = router.currentRoute.value.query.redirect as string
 
+    console.log('Auth store: redirectAfterLogin called with role:', role, 'intendedRoute:', intendedRoute)
+
+    // Use nextTick to ensure the user state is properly set
+    await new Promise(resolve => setTimeout(resolve, 100))
+
     if (intendedRoute) {
-      router.push(intendedRoute)
+      console.log('Auth store: redirecting to intended route:', intendedRoute)
+      router.replace(intendedRoute)
     } else {
       switch (role) {
         case 'admin':
-          router.push('/admin/dashboard')
+          console.log('Auth store: redirecting admin to /admin/dashboard')
+          router.replace('/admin/dashboard')
           break
         case 'mahasiswa':
-          router.push('/mahasiswa/dashboard')
+          console.log('Auth store: redirecting mahasiswa to /mahasiswa/dashboard')
+          router.replace('/mahasiswa/dashboard')
           break
         case 'dosen':
-          router.push('/dosen/dashboard')
+          console.log('Auth store: redirecting dosen to /dosen/dashboard')
+          router.replace('/dosen/dashboard')
           break
         case 'staf':
-          router.push('/staf/dashboard')
+          console.log('Auth store: redirecting staf to /staf/dashboard')
+          router.replace('/staf/dashboard')
           break
         default:
-          router.push('/dashboard')
+          console.log('Auth store: redirecting to default /dashboard')
+          router.replace('/dashboard')
       }
     }
   }

@@ -7,25 +7,23 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useAuthStore } from './stores/auth'
-import { useNotificationStore } from './stores/notification'
 
 const authStore = useAuthStore()
-const notificationStore = useNotificationStore()
 
 onMounted(async () => {
   // Check for existing authentication token
   const token = localStorage.getItem('auth_token')
   if (token) {
     try {
+      console.log('App: Found existing token, checking auth')
       await authStore.checkAuth()
+      console.log('App: Auth check successful')
     } catch (error) {
-      console.error('Auth check failed:', error)
-      authStore.logout()
+      console.error('App: Auth check failed:', error)
+      // Clear invalid token but don't automatically logout
+      localStorage.removeItem('auth_token')
     }
   }
-
-  // Initialize notifications
-  notificationStore.initialize()
 })
 </script>
 

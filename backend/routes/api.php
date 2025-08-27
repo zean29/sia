@@ -25,6 +25,15 @@ use App\Http\Controllers\Api\IntegrasiPddiktiController;
 |
 */
 
+// Test route
+Route::get('/', function () {
+    return response()->json([
+        'message' => 'SIA API is working',
+        'version' => '1.0.0',
+        'timestamp' => now()
+    ]);
+});
+
 // Routes untuk autentikasi (tidak perlu login)
 Route::prefix('autentikasi')->name('auth.')->group(function () {
     Route::post('/masuk', [AutentikasiController::class, 'masuk'])->name('masuk');
@@ -45,6 +54,34 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Dashboard - semua peran bisa akses
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Dashboard specific endpoints
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        // Admin dashboard data
+        Route::middleware(['cek.peran:admin'])->group(function () {
+            Route::get('/admin/stats', [DashboardController::class, 'adminStats'])->name('admin.stats');
+            Route::get('/admin/recent-students', [DashboardController::class, 'recentStudents'])->name('admin.recent-students');
+            Route::get('/admin/recent-payments', [DashboardController::class, 'recentPayments'])->name('admin.recent-payments');
+            Route::get('/admin/activities', [DashboardController::class, 'adminActivities'])->name('admin.activities');
+        });
+        
+        // Dosen dashboard data
+        Route::middleware(['cek.peran:dosen'])->group(function () {
+            Route::get('/dosen/stats', [DashboardController::class, 'dosenStats'])->name('dosen.stats');
+            Route::get('/dosen/today-schedule', [DashboardController::class, 'dosenTodaySchedule'])->name('dosen.today-schedule');
+            Route::get('/dosen/recent-submissions', [DashboardController::class, 'dosenRecentSubmissions'])->name('dosen.recent-submissions');
+            Route::get('/dosen/late-students', [DashboardController::class, 'dosenLateStudents'])->name('dosen.late-students');
+        });
+        
+        // Mahasiswa dashboard data
+        Route::middleware(['cek.peran:mahasiswa'])->group(function () {
+            Route::get('/mahasiswa/stats', [DashboardController::class, 'mahasiswaStats'])->name('mahasiswa.stats');
+            Route::get('/mahasiswa/today-schedule', [DashboardController::class, 'mahasiswaTodaySchedule'])->name('mahasiswa.today-schedule');
+            Route::get('/mahasiswa/recent-grades', [DashboardController::class, 'mahasiswaRecentGrades'])->name('mahasiswa.recent-grades');
+            Route::get('/mahasiswa/recent-payments', [DashboardController::class, 'mahasiswaRecentPayments'])->name('mahasiswa.recent-payments');
+            Route::get('/mahasiswa/announcements', [DashboardController::class, 'mahasiswaAnnouncements'])->name('mahasiswa.announcements');
+        });
+    });
 
     // Routes untuk Mahasiswa
     Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
